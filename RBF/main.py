@@ -1,6 +1,7 @@
 from manimlib import *
 import cv2
 
+
 class MainScene(Scene):
     def construct(self):
 
@@ -13,7 +14,7 @@ class MainScene(Scene):
             x_range=(0, 8),
             y_range=(-8, 0),
             axis_config={"stroke_color": "#FFFFFF"},
-            background_line_style={"stroke_color": "#FFFFFF", "stroke_width": 1},
+            background_line_style={"stroke_color": "#FFFFFF", "stroke_width": 6},
             faded_line_ratio=64
         )
 
@@ -31,10 +32,9 @@ class MainScene(Scene):
 
         self.play(Write(width_label), ShowCreation(width_line), ShowCreation(heigh_line))
 
-        self.wait(2)
+        self.wait(1)
 
         self.play(ShowCreation(grid))
-
 
         self.play(
             # Set the size with the width of a object
@@ -63,11 +63,16 @@ class PixelGrid(Scene):
             x_range=(0, 10),
             y_range=(-10, 0),
             axis_config={"stroke_color": "#434343"},
-            background_line_style={"stroke_color": "#434343", "stroke_width": 1.5},
+            background_line_style={"stroke_color": "#434343", "stroke_width": 5},
             faded_line_ratio=0
         )
 
         self.play(ShowCreation(grid))
+
+        self.play(
+            # Set the size with the width of a object
+            self.camera.frame.animate.scale(1.5)
+        )
 
         y_pos = 0
         pixels = []
@@ -103,9 +108,9 @@ class PixelGrid(Scene):
             pixels.append(row)
 
         for row in pixels:
-            for pixel in row:
+            #for pixel in row:
                 #self.play(FadeIn(pixel), run_time=0.01)
-                self.add(pixel)
+            self.add(row)
 
         self.remove(grid)
 
@@ -120,14 +125,24 @@ class PixelGrid(Scene):
 
         #self.wait(2)
 
-        for row in pixels:
-            for pixel in row:
+        pixels_value = []
+        for pixel_row in pixels:
+
+            row = VGroup()
+
+            for pixel in pixel_row:
                 pixel_value = int(pixel.fill_color.hsl[2] * 255)
                 if pixel_value > 127:
                     pixel_text = MarkupText(f"{pixel_value}").set_color("#000000").scale(0.5).next_to(pixel, direction=IN, buff=0.1)
                 else:
                     pixel_text = MarkupText(f"{pixel_value}").set_color("#D4D4D4").scale(0.5).next_to(pixel, direction=IN, buff=0.1)
-                self.play(Write(pixel_text), run_time=0.01)
 
+                row.add(pixel_text)
+                #self.play(Write(pixel_text), run_time=0.01)
 
+            pixels_value.append(row)
 
+        for row in pixels_value:
+            self.add(row)
+
+        self.play(FadeOut(pixel_text), FadeOut(grid), *[FadeOut(row) for row in pixels[1:]], *[FadeOut(row) for row in pixels_value[1:]])
